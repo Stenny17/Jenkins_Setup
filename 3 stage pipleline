@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+
+    environment {
+        APP_NAME = "my-app"
+    }
+
+    stages {
+        stage('Build in Dev') {
+            steps {
+                echo "Building the application in DEV environment..."
+                sh 'echo Building ${APP_NAME}...'
+            }
+        }
+
+        stage('Deploy to Stage') {
+            steps {
+                echo "Deploying to STAGE environment..."
+                sh 'echo Deploying ${APP_NAME} to STAGE...'
+            }
+        }
+
+        stage('Run Tests in Stage') {
+            steps {
+                echo "Running tests in STAGE environment..."
+                sh 'echo Running tests for ${APP_NAME} in STAGE...'
+            }
+        }
+
+        stage('Approval for Prod Deployment') {
+            steps {
+                script {
+                    def userInput = input(
+                        message: 'Deploy to PROD?',
+                        parameters: [choice(name: 'Confirm', choices: ['Yes', 'No'], description: 'Deploy to PROD?')]
+                    )
+                    if (userInput == 'No') {
+                        error("Deployment to PROD aborted!")
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Prod') {
+            steps {
+                echo "Deploying to PROD environment..."
+                sh 'echo Deploying ${APP_NAME} to PROD...'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment Successful!"
+        }
+        failure {
+            echo "Deployment Failed!"
+        }
+    }
+}
